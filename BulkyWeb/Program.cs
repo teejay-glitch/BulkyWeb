@@ -12,7 +12,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 // registering services to allow dependency injection
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+//builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); --> we no longer need this because we have this in the unitOfWork
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 

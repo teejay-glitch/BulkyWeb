@@ -17,11 +17,11 @@ namespace Bulky.DataAccess.Repository
         {
             _db = db;
         }
-        public void Save()
-        {
-            _db.SaveChanges();
-        }
 
+        //public void Save()  we no longer need this because we have moved this global method to unitOfWork
+        //{
+        //    _db.SaveChanges();
+        //}
         public void Update(Category category)
         {
             _db.Update(category);
