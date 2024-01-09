@@ -11,46 +11,103 @@ namespace BulkyWeb.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductController(IUnitOfWork unitOfWork)
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
         {
-            List<Product> products = _unitOfWork.ProductRepository.GetAll().ToList();
+            List<Product> products = _unitOfWork.ProductRepository.GetAll(includeProperties:"Category").ToList();
             return View(products);
         }
 
-        public IActionResult Create()
+        //public IActionResult Create()
+        //{
+        //    //This is called projection
+        //    IEnumerable<SelectListItem> CategoryList = _unitOfWork.CategoryRepository.GetAll().Select(u => new SelectListItem
+        //    {
+        //        Text = u.Name,
+        //        Value = u.Id.ToString()
+        //    });
+
+        //    //ViewBag'.CategoryList = CategoryList; 
+        //    //ViewData["CategoryList"] = CategoryList;
+
+        //    // using ViewModels
+        //    ProductVM productVM = new()
+        //    {
+        //        CategoryList = CategoryList,
+        //        Product = new Product()
+        //    };
+
+        //    return View(productVM);
+        //}
+
+        // For file upload
+        public IActionResult Upsert(int? id)
         {
-            //This is called projection
-            IEnumerable<SelectListItem> CategoryList = _unitOfWork.CategoryRepository.GetAll().Select(u => new SelectListItem
-            {
-                Text = u.Name,
-                Value = u.Id.ToString()
-            });
-
-            //ViewBag'.CategoryList = CategoryList; 
-            //ViewData["CategoryList"] = CategoryList;
-
-            // using ViewModels
             ProductVM productVM = new()
             {
-                CategoryList = CategoryList,
+                CategoryList = _unitOfWork.CategoryRepository.GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                }),
                 Product = new Product()
             };
 
-            return View(productVM);
+            if(id == null || id == 0)
+            {
+                return View(productVM);
+            } else
+            {
+                productVM.Product = _unitOfWork.ProductRepository.GetFirstOrDefault(u => u.Id == id);
+                return View(productVM);
+            }            
         }
 
         [HttpPost]
-        public IActionResult Create(ProductVM productVM)
+        public IActionResult Upsert(ProductVM productVM, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.ProductRepository.Add(productVM.Product);
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+
+                if(file != null)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    string productPath = Path.Combine(wwwRootPath, @"images\product");
+
+                    if (!string.IsNullOrEmpty(productVM.Product.ImageUrl))
+                    {
+                        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                    }
+
+                    using(var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                    {
+                        file.CopyTo(fileStream);
+                    };
+
+                    productVM.Product.ImageUrl = @"\images\product\" + fileName;
+                }
+
+                if(productVM.Product.Id == 0)
+                {
+                    _unitOfWork.ProductRepository.Add(productVM.Product);
+                } else
+                {
+                    _unitOfWork.ProductRepository.Update(productVM.Product);
+                }
+               
                 _unitOfWork.Save();
                 TempData["success"] = "Product created successfully";
                 return RedirectToAction("Index", "Product");
@@ -64,34 +121,7 @@ namespace BulkyWeb.Areas.Admin.Controllers
                 });
                 return View(productVM);
             }
-        }
-
-        public IActionResult Edit(int? id)
-        {
-            Product product = _unitOfWork.ProductRepository.GetFirstOrDefault(x => x.Id == id);
-
-            if(product != null)
-            {
-                return View(product);
-            }
-
-            return NotFound();
-        }
-
-        [HttpPost]
-        public IActionResult Edit(Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                _unitOfWork.ProductRepository.Update(product);
-                _unitOfWork.Save();
-                TempData["success"] = "Product updated successfully";
-                return RedirectToAction("Index", "Product");
-            }
-
-            TempData["error"] = "Failed to update the product";
-            return View();
-        }
+        }        
 
         public IActionResult Delete(int id)
         {
@@ -119,6 +149,16 @@ namespace BulkyWeb.Areas.Admin.Controllers
             TempData["success"] = "Product deleted successfully";
             return RedirectToAction("Index", "Product");
         }
+
+        #region
+        // API Calls
+        public IActionResult GetAll()
+        {
+            List<Product> products = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category").ToList();
+            return Json(new { data = products });
+        }
+
+        #endregion
 
     }
 }

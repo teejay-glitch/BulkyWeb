@@ -26,15 +26,34 @@ namespace Bulky.DataAccess.Repository
             // _db.Set<T>().Add(entity); --> if we did not assign this in constructor, we do like this as well
         }
 
-        public IEnumerable<T> GetAll()
+        public IEnumerable<T> GetAll(string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
+
+            //include properties gets here as comma seperated strings, therefore the following implementation comes
+            if (!string.IsNullOrEmpty(includeProperties))
+            {   
+                foreach(var property in includeProperties.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(property);
+                }
+            }
+
             return query.ToList();
         }
 
-        public T GetFirstOrDefault(Expression<Func<T, bool>> filter)
+        public T GetFirstOrDefault(Expression<Func<T, bool>> filter, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var property in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(property);
+                }
+            }
+
             query = query.Where(filter);
             return query.FirstOrDefault();
         }
