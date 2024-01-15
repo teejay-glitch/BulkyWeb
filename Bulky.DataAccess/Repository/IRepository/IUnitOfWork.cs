@@ -11,6 +11,7 @@ namespace Bulky.DataAccess.Repository.IRepository
         // here we define all the repositories and the global methods
         ICategoryRepository CategoryRepository { get; }
         IProductRepository ProductRepository { get; }
+        ICompanyRepository CompanyRepository { get; }
         void Save();
     }
 }
