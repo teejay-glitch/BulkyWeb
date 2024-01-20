@@ -1,12 +1,7 @@
 ﻿using Bulky.DataAccess.Data;
 using Bulky.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bulky.DataAccess.Repository
 {
@@ -26,9 +21,10 @@ namespace Bulky.DataAccess.Repository
             // _db.Set<T>().Add(entity); --> if we did not assign this in constructor, we do like this as well
         }
 
-        public IEnumerable<T> GetAll(string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
+            if (filter != null) query = query.Where(filter);           
 
             //include properties gets here as comma seperated strings, therefore the following implementation comes
             if (!string.IsNullOrEmpty(includeProperties))
