@@ -9,6 +9,8 @@ namespace Bulky.DataAccess.Repository.IRepository
 {
     public interface IOrderHeaderRepository : IRepository<OrderHeader>
     {
-        public void Update(OrderHeader orderHeader);
+        void Update(OrderHeader orderHeader);
+        void UpdateStatus(int id, string OrderStatus, string? PaymentStatus = null);
+        void UpdateStripePaymentId(int id, string sessionId, string paymentIntentId);        
     }
 }
