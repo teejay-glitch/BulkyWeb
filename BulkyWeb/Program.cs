@@ -25,6 +25,16 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = $"/Identity/Account/Logout";
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
+
+// adding sessions in the project
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(100);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddRazorPages();
 
 // registering services to allow dependency injection
@@ -52,6 +62,8 @@ app.UseRouting();
 app.UseAuthentication();// -->
 
 app.UseAuthorization();
+
+app.UseSession(); 
 
 app.MapRazorPages();
 

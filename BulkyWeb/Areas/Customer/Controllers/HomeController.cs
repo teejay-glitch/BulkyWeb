@@ -1,5 +1,6 @@
 ﻿using Bulky.DataAccess.Repository.IRepository;
 using Bulky.Models;
+using Bulky.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -21,6 +22,15 @@ namespace BulkyWeb.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (claim != null)
+            {
+                var sessionCount = _unitOfWork.ShoppingCartRepository.GetAll(u => u.ApplicationUserId == claim.Value).Count();
+                HttpContext.Session.SetInt32(SD.SessionCart, sessionCount);
+            }
+
             IEnumerable<Product> products = _unitOfWork.ProductRepository.GetAll().ToList();
             return View(products);
         }
@@ -48,16 +58,19 @@ namespace BulkyWeb.Areas.Customer.Controllers
 
             ShoppingCart savedShoppingCart = _unitOfWork.ShoppingCartRepository.GetFirstOrDefault(u => u.ApplicationUserId == userId && u.ProductId == shoppingCart.ProductId);
 
-            if(savedShoppingCart != null)
+            if (savedShoppingCart != null)
             {
                 savedShoppingCart.Count += shoppingCart.Count;
                 _unitOfWork.ShoppingCartRepository.Update(savedShoppingCart);
-            } else
+            }
+            else
             {
                 _unitOfWork.ShoppingCartRepository.Add(shoppingCart);
-            } 
-            
-            _unitOfWork.Save();
+                _unitOfWork.Save();
+                var sessionCount = _unitOfWork.ShoppingCartRepository.GetAll(u => u.ApplicationUserId == userId).Count();
+                HttpContext.Session.SetInt32(SD.SessionCart, sessionCount);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
