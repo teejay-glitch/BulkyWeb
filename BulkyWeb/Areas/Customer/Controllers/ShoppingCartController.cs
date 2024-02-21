@@ -169,28 +169,25 @@ namespace BulkyWeb.Areas.Customer.Controllers
             // this redirect to the order confirmation page with the model id
         }
 
-        public IActionResult OrderConfirmation(int id)
+        public IActionResult OrderConfirmation(int orderHeaderId)
         {
-            OrderHeader orderHeader = _unitOfWork.OrderHeaderRepository.GetFirstOrDefault(u=>u.Id == id, includeProperties:"ApplicationUser");
+            OrderHeader orderHeader = _unitOfWork.OrderHeaderRepository.GetFirstOrDefault(u=>u.Id == orderHeaderId, includeProperties:"ApplicationUser");
 
-            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
+                // this is a order by a company
                 var service = new SessionService();
                 Session session = service.Get(orderHeader.SessionId);
 
                 if(session.PaymentStatus.ToLower() == "paid")
                 {
-                    _unitOfWork.OrderHeaderRepository.UpdateStripePaymentId(id, session.Id, session.PaymentIntentId);
-                    _unitOfWork.OrderHeaderRepository.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
+                    _unitOfWork.OrderHeaderRepository.UpdateStripePaymentId(orderHeaderId, session.Id, session.PaymentIntentId);
+                    _unitOfWork.OrderHeaderRepository.UpdateStatus(orderHeaderId, orderHeader.OrderStatus, SD.PaymentStatusApproved);
                     _unitOfWork.Save();
                 }
             }
 
-            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCartRepository.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
-            _unitOfWork.ShoppingCartRepository.RemoveRange(shoppingCarts);
-            _unitOfWork.Save();
-
-            return View(id);
+            return View(orderHeaderId);
         }
 
         public IActionResult Plus(int cartId)
