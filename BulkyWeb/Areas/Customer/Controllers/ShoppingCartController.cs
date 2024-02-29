@@ -185,6 +185,8 @@ namespace BulkyWeb.Areas.Customer.Controllers
                     _unitOfWork.OrderHeaderRepository.UpdateStatus(orderHeaderId, orderHeader.OrderStatus, SD.PaymentStatusApproved);
                     _unitOfWork.Save();
                 }
+                // this resets the shopping card count after purchase
+                HttpContext.Session.Clear();
             }
 
             return View(orderHeaderId);

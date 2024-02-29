@@ -181,7 +181,8 @@ namespace BulkyWeb.Areas.Identity.Pages.Account
                     if (!string.IsNullOrEmpty(Input.Role))
                     {
                         await _userManager.AddToRoleAsync(user, Input.Role);
-                    } else
+                    }
+                    else
                     {
                         await _userManager.AddToRoleAsync(user, SD.Role_Customer);
                     }
@@ -204,8 +205,16 @@ namespace BulkyWeb.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
+                        if (User.IsInRole(SD.Role_Admin))
+                        {
+                            TempData["success"] = "New user created successfully!";
+                        }
+                        else
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            return LocalRedirect(returnUrl);
+                        }
+
                     }
                 }
                 foreach (var error in result.Errors)
