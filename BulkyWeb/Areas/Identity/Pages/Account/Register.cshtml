@@ -128,26 +128,25 @@
                         }
                     </section>
                 </div>
-            </div>
             }
+        </div>
     </div>
-</div>
 
 
 
     @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        $(document).ready(function () {
-            $('#Input_Role').change(function () {
-                var selection = $('#Input_Role option:selected').text();
-                console.log("Selection:", selection);
-                if (selection == 'Company') {
-                    $('#Input_CompanyId').show();
-                } else {
-                    $('#Input_CompanyId').hide();
-                }
+        <partial name="_ValidationScriptsPartial" />
+        <script>
+            $(document).ready(function () {
+                $('#Input_Role').change(function () {
+                    var selection = $('#Input_Role option:selected').text();
+                    console.log("Selection:", selection);
+                    if (selection == 'Company') {
+                        $('#Input_CompanyId').show();
+                    } else {
+                        $('#Input_CompanyId').hide();
+                    }
+                });
             });
-        });
-    </script>
+        </script>
     }
