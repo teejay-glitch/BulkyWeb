@@ -31,7 +31,7 @@ namespace BulkyWeb.Areas.Customer.Controllers
                 HttpContext.Session.SetInt32(SD.SessionCart, sessionCount);
             }
 
-            IEnumerable<Product> products = _unitOfWork.ProductRepository.GetAll().ToList();
+            IEnumerable<Product> products = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category,ProductImages").ToList();
             return View(products);
         }
 
@@ -39,7 +39,7 @@ namespace BulkyWeb.Areas.Customer.Controllers
         {
             ShoppingCart shoppingCart = new()
             {
-                Product = _unitOfWork.ProductRepository.GetFirstOrDefault(u => u.Id == productId, includeProperties: "Category"),
+                Product = _unitOfWork.ProductRepository.GetFirstOrDefault(u => u.Id == productId, includeProperties: "Category,ProductImages"),
                 Count = 1,
                 ProductId = productId
             };

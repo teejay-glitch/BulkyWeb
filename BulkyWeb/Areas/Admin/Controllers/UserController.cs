@@ -118,7 +118,7 @@ namespace BulkyWeb.Areas.Admin.Controllers
                 _db.SaveChanges();
 
                 _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
-                _userManager.AddToRoleAsync(applicationUser, roleManagementVM.ApplicationUser.Role).GetAwaiter().GetResult();W
+                _userManager.AddToRoleAsync(applicationUser, roleManagementVM.ApplicationUser.Role).GetAwaiter().GetResult();
             }
 
             return RedirectToAction("Index");

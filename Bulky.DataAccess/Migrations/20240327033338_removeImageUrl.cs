@@ -5,10 +5,22 @@
 namespace Bulky.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class AddImageUrlToProduct : Migration
+    public partial class removeImageUrl : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "ImageUrl",
+                table: "Products");
+
+            migrationBuilder.DropColumn(
+                name: "TestProperty",
+                table: "Products");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
                 name: "ImageUrl",
@@ -17,55 +29,53 @@ namespace Bulky.DataAccess.Migrations
                 nullable: false,
                 defaultValue: "");
 
+            migrationBuilder.AddColumn<string>(
+                name: "TestProperty",
+                table: "Products",
+                type: "nvarchar(max)",
+                nullable: true);
+
             migrationBuilder.UpdateData(
                 table: "Products",
                 keyColumn: "Id",
                 keyValue: 1,
-                column: "ImageUrl",
-                value: "");
+                columns: new[] { "ImageUrl", "TestProperty" },
+                values: new object[] { "", null });
 
             migrationBuilder.UpdateData(
                 table: "Products",
                 keyColumn: "Id",
                 keyValue: 2,
-                column: "ImageUrl",
-                value: "");
+                columns: new[] { "ImageUrl", "TestProperty" },
+                values: new object[] { "", null });
 
             migrationBuilder.UpdateData(
                 table: "Products",
                 keyColumn: "Id",
                 keyValue: 3,
-                column: "ImageUrl",
-                value: "");
+                columns: new[] { "ImageUrl", "TestProperty" },
+                values: new object[] { "", null });
 
             migrationBuilder.UpdateData(
                 table: "Products",
                 keyColumn: "Id",
                 keyValue: 4,
-                column: "ImageUrl",
-                value: "");
+                columns: new[] { "ImageUrl", "TestProperty" },
+                values: new object[] { "", null });
 
             migrationBuilder.UpdateData(
                 table: "Products",
                 keyColumn: "Id",
                 keyValue: 5,
-                column: "ImageUrl",
-                value: "");
+                columns: new[] { "ImageUrl", "TestProperty" },
+                values: new object[] { "", null });
 
             migrationBuilder.UpdateData(
                 table: "Products",
                 keyColumn: "Id",
                 keyValue: 6,
-                column: "ImageUrl",
-                value: "");
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "ImageUrl",
-                table: "Products");
+                columns: new[] { "ImageUrl", "TestProperty" },
+                values: new object[] { "", null });
         }
     }
 }

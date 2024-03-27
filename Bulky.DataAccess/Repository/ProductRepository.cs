@@ -34,10 +34,7 @@ namespace Bulky.DataAccess.Repository
                 productObj.Price50 = product.Price50;
                 productObj.Price100 = product.Price100;
                 productObj.Category = product.Category;
-                if(productObj.ImageUrl != null) 
-                {
-                    productObj.ImageUrl = product.ImageUrl;
-                }
+                productObj.ProductImages = product.ProductImages;
             }
         }
     }

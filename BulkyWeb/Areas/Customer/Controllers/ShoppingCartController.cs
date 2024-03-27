@@ -33,8 +33,11 @@ namespace BulkyWeb.Areas.Customer.Controllers
                 OrderHeader = new()
             };
 
+            IEnumerable<ProductImage> productImages = _unitOfWork.ProductImageRepository.GetAll();
+
             foreach (ShoppingCart shoppingCart in ShoppingCartVM.ShoppingCartList)
             {
+                shoppingCart.Product.ProductImages = productImages.Where(u => u.ProductId == shoppingCart.Product.Id).ToList();
                 shoppingCart.Price = GetPriceBasedOnQuantity(shoppingCart);
                 ShoppingCartVM.OrderHeader.OrderTotal += (shoppingCart.Price * shoppingCart.Count);
             }
@@ -169,11 +172,11 @@ namespace BulkyWeb.Areas.Customer.Controllers
             // this redirect to the order confirmation page with the model id
         }
 
-        public IActionResult OrderConfirmation(int orderHeaderId)
+        public IActionResult OrderConfirmation(int id)
         {
-            OrderHeader orderHeader = _unitOfWork.OrderHeaderRepository.GetFirstOrDefault(u=>u.Id == orderHeaderId, includeProperties:"ApplicationUser");
+            OrderHeader orderHeader = _unitOfWork.OrderHeaderRepository.GetFirstOrDefault(u=>u.Id == id, includeProperties:"ApplicationUser");
 
-            if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
+            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
             {
                 // this is a order by a company
                 var service = new SessionService();
@@ -181,15 +184,15 @@ namespace BulkyWeb.Areas.Customer.Controllers
 
                 if(session.PaymentStatus.ToLower() == "paid")
                 {
-                    _unitOfWork.OrderHeaderRepository.UpdateStripePaymentId(orderHeaderId, session.Id, session.PaymentIntentId);
-                    _unitOfWork.OrderHeaderRepository.UpdateStatus(orderHeaderId, orderHeader.OrderStatus, SD.PaymentStatusApproved);
+                    _unitOfWork.OrderHeaderRepository.UpdateStripePaymentId(id, session.Id, session.PaymentIntentId);
+                    _unitOfWork.OrderHeaderRepository.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
                     _unitOfWork.Save();
                 }
                 // this resets the shopping card count after purchase
                 HttpContext.Session.Clear();
             }
 
-            return View(orderHeaderId);
+            return View(id);
         }
 
         public IActionResult Plus(int cartId)
